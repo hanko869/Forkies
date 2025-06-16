@@ -2,7 +2,7 @@ import { getUser } from '@/lib/auth/utils';
 import { createClient } from '@/lib/supabase/server';
 import AppLayout from '@/components/shared/AppLayout';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Users, Phone, MessageSquare, DollarSign } from 'lucide-react';
+import { Users, Phone, MessageSquare, DollarSign, TrendingUp } from 'lucide-react';
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 
@@ -115,6 +115,12 @@ export default async function AdminDashboard() {
               <Button variant="outline">
                 <DollarSign className="mr-2 h-4 w-4" />
                 Manage Credits
+              </Button>
+            </Link>
+            <Link href="/admin/analytics">
+              <Button variant="outline">
+                <TrendingUp className="mr-2 h-4 w-4" />
+                View Analytics
               </Button>
             </Link>
           </CardContent>

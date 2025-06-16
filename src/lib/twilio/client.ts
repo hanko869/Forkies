@@ -3,13 +3,20 @@ import twilio from 'twilio';
 const accountSid = process.env.TWILIO_ACCOUNT_SID;
 const authToken = process.env.TWILIO_AUTH_TOKEN;
 
-if (!accountSid || !authToken) {
-  throw new Error('Twilio credentials are not configured');
-}
+// Create a dummy client if credentials are not available
+const isDevelopment = process.env.NODE_ENV === 'development';
+const hasCredentials = accountSid && authToken && accountSid.startsWith('AC');
 
-export const twilioClient = twilio(accountSid, authToken);
+export const twilioClient = hasCredentials 
+  ? twilio(accountSid, authToken)
+  : null;
 
 export const sendSMS = async (to: string, from: string, body: string) => {
+  if (!twilioClient) {
+    console.warn('Twilio client not initialized - SMS not sent');
+    return { success: false, error: 'Twilio credentials not configured' };
+  }
+  
   try {
     const message = await twilioClient.messages.create({
       body,
@@ -24,6 +31,11 @@ export const sendSMS = async (to: string, from: string, body: string) => {
 };
 
 export const makeCall = async (to: string, from: string, url: string) => {
+  if (!twilioClient) {
+    console.warn('Twilio client not initialized - Call not made');
+    return { success: false, error: 'Twilio credentials not configured' };
+  }
+  
   try {
     const call = await twilioClient.calls.create({
       url,
@@ -38,6 +50,11 @@ export const makeCall = async (to: string, from: string, url: string) => {
 };
 
 export const getAvailablePhoneNumbers = async (areaCode?: string) => {
+  if (!twilioClient) {
+    console.warn('Twilio client not initialized');
+    return [];
+  }
+  
   try {
     const numbers = await twilioClient.availablePhoneNumbers('US')
       .local
@@ -65,6 +82,11 @@ export const getAvailablePhoneNumbers = async (areaCode?: string) => {
 };
 
 export const purchasePhoneNumber = async (phoneNumber: string) => {
+  if (!twilioClient) {
+    console.warn('Twilio client not initialized');
+    return { success: false, error: 'Twilio credentials not configured' };
+  }
+  
   try {
     const number = await twilioClient.incomingPhoneNumbers.create({
       phoneNumber,

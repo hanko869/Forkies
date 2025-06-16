@@ -116,6 +116,12 @@ export default async function DashboardPage() {
                 Manage Numbers
               </Button>
             </Link>
+            <Link href="/dashboard/bulk-sms">
+              <Button variant="outline">
+                <MessageSquare className="mr-2 h-4 w-4" />
+                Bulk SMS
+              </Button>
+            </Link>
           </CardContent>
         </Card>
 
