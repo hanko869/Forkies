@@ -9,9 +9,14 @@ export default function Home() {
       <nav className="border-b bg-white/80 backdrop-blur-sm sticky top-0 z-50">
         <div className="container mx-auto px-4 py-4">
           <div className="flex items-center justify-between">
-            <div className="flex items-center space-x-2">
-              <MessageSquare className="h-8 w-8 text-blue-600" />
-              <span className="text-2xl font-bold">2Way SMS</span>
+            <div className="flex items-center space-x-3">
+              <div className="bg-gradient-to-r from-purple-600 to-blue-600 p-2 rounded-lg">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" className="text-white">
+                  <path d="M5 7C5 5.89543 5.89543 5 7 5C8.10457 5 9 5.89543 9 7V12L12 15L15 12V7C15 5.89543 15.8954 5 17 5C18.1046 5 19 5.89543 19 7V12C19 12.5304 18.7893 13.0391 18.4142 13.4142L13.4142 18.4142C12.6332 19.1953 11.3668 19.1953 10.5858 18.4142L5.58579 13.4142C5.21071 13.0391 5 12.5304 5 12V7Z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                  <path d="M12 15V21" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                </svg>
+              </div>
+              <span className="text-2xl font-bold bg-gradient-to-r from-purple-600 to-blue-600 bg-clip-text text-transparent">Forkies</span>
             </div>
             <div className="flex items-center space-x-4">
               <Link href="/login">
@@ -29,7 +34,7 @@ export default function Home() {
             Professional Two-Way SMS & Voice Communication
           </h1>
           <p className="text-xl text-gray-600 mb-8">
-            Empower your business with a Google Voice-inspired platform for seamless SMS and voice communications. 
+            Empower your business with Forkies - a Google Voice-inspired platform for seamless SMS and voice communications. 
             Manage multiple phone numbers, send bulk messages, and track all conversations in one place.
           </p>
           <div className="flex gap-4 justify-center">
@@ -87,11 +92,11 @@ export default function Home() {
       </section>
 
       {/* CTA Section */}
-      <section className="py-20 bg-blue-600 text-white">
+      <section className="py-20 bg-gradient-to-r from-purple-600 to-blue-600 text-white">
         <div className="container mx-auto px-4 text-center">
           <h2 className="text-4xl font-bold mb-6">Ready to Transform Your Communication?</h2>
           <p className="text-xl mb-8 opacity-90">
-            Contact your administrator for access to the 2Way SMS platform.
+            Contact your administrator for access to the Forkies platform.
           </p>
           <Link href="/login">
             <Button size="lg" variant="secondary" className="px-8">
@@ -104,7 +109,7 @@ export default function Home() {
       {/* Footer */}
       <footer className="py-8 border-t">
         <div className="container mx-auto px-4 text-center text-gray-600">
-          <p>&copy; 2025 2Way SMS. All rights reserved.</p>
+          <p>&copy; 2025 Forkies. All rights reserved.</p>
         </div>
       </footer>
     </div>
