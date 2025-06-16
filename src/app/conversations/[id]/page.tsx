@@ -5,14 +5,15 @@ import ConversationView from '@/components/user/ConversationView';
 import { notFound } from 'next/navigation';
 
 interface PageProps {
-  params: {
+  params: Promise<{
     id: string;
-  };
+  }>;
 }
 
 export default async function ConversationPage({ params }: PageProps) {
   const user = await requireUser();
   const supabase = await createClient();
+  const { id } = await params;
 
   // Fetch conversation with messages
   const { data: conversation } = await supabase
@@ -22,7 +23,7 @@ export default async function ConversationPage({ params }: PageProps) {
       phone_numbers(number),
       messages(*)
     `)
-    .eq('id', params.id)
+    .eq('id', id)
     .eq('user_id', user.id)
     .single();
 
@@ -35,7 +36,7 @@ export default async function ConversationPage({ params }: PageProps) {
     await supabase
       .from('conversations')
       .update({ unread_count: 0 })
-      .eq('id', params.id);
+      .eq('id', id);
   }
 
   return (

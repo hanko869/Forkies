@@ -7,7 +7,6 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Loader2 } from 'lucide-react';
 import Link from 'next/link';
 
@@ -32,25 +31,23 @@ export default function LoginPage() {
 
       if (error) {
         setError(error.message);
-        setLoading(false);
         return;
       }
 
       if (data.user) {
-        // Get user profile to check role
+        // Refresh the router to ensure the session is properly established
+        router.refresh();
+        
+        // Small delay to ensure cookies are set
+        await new Promise(resolve => setTimeout(resolve, 100));
+        
+        // Get user profile to determine role
         const { data: profile } = await supabase
           .from('users')
           .select('role')
           .eq('id', data.user.id)
           .single();
 
-        // Refresh the router to ensure the session is properly established
-        router.refresh();
-        
-        // Small delay to ensure cookies are set
-        await new Promise(resolve => setTimeout(resolve, 100));
-
-        // Redirect based on role
         if (profile?.role === 'admin') {
           router.push('/admin');
         } else {
@@ -59,6 +56,7 @@ export default function LoginPage() {
       }
     } catch (err) {
       setError('An unexpected error occurred');
+    } finally {
       setLoading(false);
     }
   };
@@ -67,17 +65,13 @@ export default function LoginPage() {
     <div className="min-h-screen flex items-center justify-center bg-gray-50">
       <Card className="w-full max-w-md">
         <CardHeader>
-          <CardTitle>Welcome back</CardTitle>
-          <CardDescription>Sign in to your account to continue</CardDescription>
+          <CardTitle>Sign In</CardTitle>
+          <CardDescription>
+            Enter your credentials to access your account
+          </CardDescription>
         </CardHeader>
         <CardContent>
           <form onSubmit={handleLogin} className="space-y-4">
-            {error && (
-              <Alert variant="destructive">
-                <AlertDescription>{error}</AlertDescription>
-              </Alert>
-            )}
-            
             <div className="space-y-2">
               <Label htmlFor="email">Email</Label>
               <Input
@@ -87,10 +81,8 @@ export default function LoginPage() {
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 required
-                disabled={loading}
               />
             </div>
-
             <div className="space-y-2">
               <Label htmlFor="password">Password</Label>
               <Input
@@ -100,27 +92,28 @@ export default function LoginPage() {
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 required
-                disabled={loading}
               />
             </div>
-
-            <Button type="submit" className="w-full" disabled={loading}>
+            {error && (
+              <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded">
+                {error}
+              </div>
+            )}
+            <Button
+              type="submit"
+              className="w-full"
+              disabled={loading}
+            >
               {loading ? (
                 <>
                   <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                   Signing in...
                 </>
               ) : (
-                'Sign in'
+                'Sign In'
               )}
             </Button>
           </form>
-
-          <div className="mt-6 text-center text-sm">
-            <Link href="/" className="text-blue-600 hover:underline">
-              Back to home
-            </Link>
-          </div>
         </CardContent>
       </Card>
     </div>
