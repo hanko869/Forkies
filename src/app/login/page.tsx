@@ -11,7 +11,7 @@ import { Loader2 } from 'lucide-react';
 import Link from 'next/link';
 
 export default function LoginPage() {
-  const [email, setEmail] = useState('');
+  const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
@@ -24,8 +24,27 @@ export default function LoginPage() {
     setLoading(true);
 
     try {
+      // First, check if it's a username or email
+      let loginEmail = username;
+      
+      // If it doesn't contain @, treat it as username and look up the email
+      if (!username.includes('@')) {
+        const { data: userData } = await supabase
+          .from('users')
+          .select('email')
+          .eq('username', username)
+          .single();
+        
+        if (userData?.email) {
+          loginEmail = userData.email;
+        } else {
+          setError('Username not found');
+          return;
+        }
+      }
+      
       const { data, error } = await supabase.auth.signInWithPassword({
-        email,
+        email: loginEmail,
         password,
       });
 
@@ -121,13 +140,13 @@ export default function LoginPage() {
           <CardContent>
             <form onSubmit={handleLogin} className="space-y-4">
               <div className="space-y-2">
-                <Label htmlFor="email" className="text-sm font-medium text-gray-700">Email</Label>
+                <Label htmlFor="username" className="text-sm font-medium text-gray-700">Username or Email</Label>
                 <Input
-                  id="email"
-                  type="email"
-                  placeholder="Enter your email"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
+                  id="username"
+                  type="text"
+                  placeholder="Enter your username or email"
+                  value={username}
+                  onChange={(e) => setUsername(e.target.value)}
                   required
                   className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all"
                 />

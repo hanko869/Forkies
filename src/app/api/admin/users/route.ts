@@ -22,10 +22,10 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
     }
 
-    const { email, password, name, role, smsCredits, voiceCredits } = await request.json();
+    const { username, password, name, role, preferredProvider, smsCredits, voiceCredits } = await request.json();
 
     // Validate input
-    if (!email || !password || !name || !role) {
+    if (!username || !password || !name || !role) {
       return NextResponse.json({ error: 'Missing required fields' }, { status: 400 });
     }
 
@@ -35,13 +35,15 @@ export async function POST(request: NextRequest) {
       process.env.SUPABASE_SERVICE_ROLE_KEY!
     );
 
-    // Create auth user
+    // Create auth user with username as email (Supabase requires email format)
+    const fakeEmail = `${username}@local.app`;
     const { data: authData, error: authError } = await adminClient.auth.admin.createUser({
-      email,
+      email: fakeEmail,
       password,
       email_confirm: true, // Auto-confirm email
       user_metadata: {
         name,
+        username,
       },
     });
 
@@ -59,8 +61,10 @@ export async function POST(request: NextRequest) {
       .insert({
         id: authData.user.id,
         email: authData.user.email,
+        username,
         name,
         role,
+        preferred_provider: preferredProvider || 'twilio',
       });
 
     if (profileError) {
@@ -87,6 +91,7 @@ export async function POST(request: NextRequest) {
       user: {
         id: authData.user.id,
         email: authData.user.email,
+        username,
         name,
         role,
       },

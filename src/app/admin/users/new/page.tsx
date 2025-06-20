@@ -13,10 +13,11 @@ import { toast } from 'sonner';
 import Link from 'next/link';
 
 export default function CreateUserPage() {
-  const [email, setEmail] = useState('');
+  const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [name, setName] = useState('');
   const [role, setRole] = useState<'user' | 'admin'>('user');
+  const [preferredProvider, setPreferredProvider] = useState<'twilio' | 'signalwire'>('twilio');
   const [smsCredits, setSmsCredits] = useState('100');
   const [voiceCredits, setVoiceCredits] = useState('10');
   const [loading, setLoading] = useState(false);
@@ -35,10 +36,11 @@ export default function CreateUserPage() {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          email,
+          username,
           password,
           name,
           role,
+          preferredProvider,
           smsCredits: parseInt(smsCredits),
           voiceCredits: parseInt(voiceCredits),
         }),
@@ -89,15 +91,16 @@ export default function CreateUserPage() {
                   />
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="email">Email</Label>
+                  <Label htmlFor="username">Username</Label>
                   <Input
-                    id="email"
-                    type="email"
-                    placeholder="john@example.com"
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
+                    id="username"
+                    type="text"
+                    placeholder="johndoe"
+                    value={username}
+                    onChange={(e) => setUsername(e.target.value)}
                     required
                   />
+                  <p className="text-xs text-gray-500">Can be any text (no @ required)</p>
                 </div>
               </div>
 
@@ -127,6 +130,20 @@ export default function CreateUserPage() {
                     </SelectContent>
                   </Select>
                 </div>
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="provider">Preferred SMS/Voice Provider</Label>
+                <Select value={preferredProvider} onValueChange={(value: 'twilio' | 'signalwire') => setPreferredProvider(value)}>
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="twilio">Twilio</SelectItem>
+                    <SelectItem value="signalwire">SignalWire</SelectItem>
+                  </SelectContent>
+                </Select>
+                <p className="text-xs text-gray-500">All outgoing messages from this user will use the selected provider</p>
               </div>
 
               <div className="space-y-4">

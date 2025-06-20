@@ -1,9 +1,11 @@
 // User types
 export interface User {
   id: string;
-  email: string;
+  email?: string;
+  username?: string;
   role: 'admin' | 'user';
   name: string;
+  preferred_provider?: 'twilio' | 'signalwire';
   created_at: string;
   updated_at: string;
 }
@@ -12,7 +14,8 @@ export interface User {
 export interface PhoneNumber {
   id: string;
   number: string;
-  provider: 'twilio';
+  provider: 'twilio' | 'signalwire';
+  provider_sid?: string;
   user_id?: string;
   is_active: boolean;
   created_at: string;
@@ -50,7 +53,7 @@ export interface Message {
   status: 'pending' | 'sent' | 'delivered' | 'failed';
   created_at: string;
   updated_at: string;
-  twilio_sid?: string;
+  provider_sid?: string;
   error_message?: string;
 }
 
@@ -65,7 +68,7 @@ export interface Call {
   status: 'initiated' | 'ringing' | 'in-progress' | 'completed' | 'failed';
   created_at: string;
   updated_at: string;
-  twilio_sid?: string;
+  provider_sid?: string;
 }
 
 // Usage types

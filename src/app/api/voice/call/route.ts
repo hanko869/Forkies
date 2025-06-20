@@ -60,11 +60,11 @@ export async function POST(request: NextRequest) {
     const result = await makeCall(recipientNumber, phoneNumber.number, twimlUrl);
 
     if (result.success) {
-      // Update call record with Twilio SID
+      // Update call record with provider SID
       await supabase
         .from('calls')
         .update({
-          twilio_sid: result.callId,
+          provider_sid: result.callId,
           status: 'ringing',
         })
         .eq('id', callRecord.id);
@@ -72,7 +72,7 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({
         success: true,
         callId: callRecord.id,
-        twilioSid: result.callId,
+        providerSid: result.callId,
       });
     } else {
       // Update call status to failed

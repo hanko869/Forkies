@@ -1,43 +1,20 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createServiceRoleClient } from '@/lib/supabase/server';
-import twilio from 'twilio';
-
-// Twilio webhook validation
-const validateTwilioRequest = (request: NextRequest, params: Record<string, any>): boolean => {
-  const twilioSignature = request.headers.get('X-Twilio-Signature');
-  const url = request.url;
-  const authToken = process.env.TWILIO_AUTH_TOKEN!;
-  
-  if (!twilioSignature) return false;
-  
-  return twilio.validateRequest(
-    authToken,
-    twilioSignature,
-    url,
-    params
-  );
-};
 
 export async function POST(request: NextRequest) {
   try {
+    // SignalWire sends data as form-encoded
     const formData = await request.formData();
-    const params: Record<string, string> = {};
     
-    // Convert FormData to object for Twilio validation
-    formData.forEach((value, key) => {
-      params[key] = value.toString();
-    });
-    
-    // Validate Twilio request (optional in development)
-    // if (process.env.NODE_ENV === 'production' && !validateTwilioRequest(request, params)) {
-    //   return NextResponse.json({ error: 'Invalid request' }, { status: 403 });
-    // }
-    
-    // Extract SMS data
+    // Extract SMS data from SignalWire webhook
     const from = formData.get('From') as string;
     const to = formData.get('To') as string;
     const messageBody = formData.get('Body') as string;
     const messageSid = formData.get('MessageSid') as string;
+    
+    // SignalWire-specific fields
+    const accountSid = formData.get('AccountSid') as string;
+    const messagingServiceSid = formData.get('MessagingServiceSid') as string;
     
     const supabase = await createServiceRoleClient();
     
@@ -50,6 +27,7 @@ export async function POST(request: NextRequest) {
     
     if (!phoneNumber || !phoneNumber.user_id) {
       console.error('Phone number not found or not assigned:', to);
+      // Return empty XML response for SignalWire
       return new NextResponse('<?xml version="1.0" encoding="UTF-8"?><Response></Response>', {
         headers: { 'Content-Type': 'text/xml' },
       });
@@ -98,14 +76,20 @@ export async function POST(request: NextRequest) {
       })
       .eq('id', conversation.id);
     
-    // Return empty TwiML response
+    // Return empty XML response (SignalWire uses the same format as Twilio)
     return new NextResponse('<?xml version="1.0" encoding="UTF-8"?><Response></Response>', {
       headers: { 'Content-Type': 'text/xml' },
     });
   } catch (error) {
-    console.error('Error processing incoming SMS:', error);
+    console.error('Error processing incoming SMS from SignalWire:', error);
     return new NextResponse('<?xml version="1.0" encoding="UTF-8"?><Response></Response>', {
       headers: { 'Content-Type': 'text/xml' },
     });
   }
+}
+
+// SignalWire also supports GET requests for webhook verification
+export async function GET(request: NextRequest) {
+  // Return 200 OK for webhook verification
+  return new NextResponse('OK', { status: 200 });
 } 

@@ -56,8 +56,10 @@ export default async function AdminUsersPage() {
               <TableHeader>
                 <TableRow>
                   <TableHead>Name</TableHead>
+                  <TableHead>Username</TableHead>
                   <TableHead>Email</TableHead>
                   <TableHead>Role</TableHead>
+                  <TableHead>Provider</TableHead>
                   <TableHead>SMS Credits</TableHead>
                   <TableHead>Voice Credits</TableHead>
                   <TableHead>Phone Numbers</TableHead>
@@ -69,10 +71,16 @@ export default async function AdminUsersPage() {
                 {users?.map((user) => (
                   <TableRow key={user.id}>
                     <TableCell className="font-medium">{user.name}</TableCell>
-                    <TableCell>{user.email}</TableCell>
+                    <TableCell>{user.username || '-'}</TableCell>
+                    <TableCell>{user.email || '-'}</TableCell>
                     <TableCell>
                       <Badge variant={user.role === 'admin' ? 'default' : 'secondary'}>
                         {user.role}
+                      </Badge>
+                    </TableCell>
+                    <TableCell>
+                      <Badge variant="outline">
+                        {user.preferred_provider || 'twilio'}
                       </Badge>
                     </TableCell>
                     <TableCell>{user.user_credits?.[0]?.sms_credits || 0}</TableCell>

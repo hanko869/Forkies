@@ -1,271 +1,148 @@
-'use client';
-
-import { useState, useEffect } from 'react';
-import { createClient } from '@/lib/supabase/client';
-import { PhoneNumber, User } from '@/types';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select';
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from '@/components/ui/table';
+import { requireAdmin } from '@/lib/auth/utils';
+import { createClient } from '@/lib/supabase/server';
+import AppLayout from '@/components/shared/AppLayout';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Phone, Plus, Trash2, User as UserIcon } from 'lucide-react';
-import { formatPhoneNumber } from '@/utils/phone';
-import { toast } from 'sonner';
+import { Button } from '@/components/ui/button';
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
+import { Badge } from '@/components/ui/badge';
+import { Plus, MoreVertical, CheckCircle, XCircle, Phone, RefreshCw } from 'lucide-react';
+import Link from 'next/link';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
 
-export default function PhoneNumbersPage() {
-  const [phoneNumbers, setPhoneNumbers] = useState<(PhoneNumber & { user?: User })[]>([]);
-  const [users, setUsers] = useState<User[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [newNumber, setNewNumber] = useState('');
-  const [selectedUserId, setSelectedUserId] = useState('');
-  const supabase = createClient();
+export default async function AdminPhoneNumbersPage() {
+  const admin = await requireAdmin();
+  const supabase = await createClient();
 
-  useEffect(() => {
-    fetchPhoneNumbers();
-    fetchUsers();
-  }, []);
-
-  const fetchPhoneNumbers = async () => {
-    const { data, error } = await supabase
-      .from('phone_numbers')
-      .select(`
-        *,
-        user:users(*)
-      `)
-      .order('created_at', { ascending: false });
-
-    if (error) {
-      toast.error('Failed to fetch phone numbers');
-      console.error(error);
-    } else {
-      setPhoneNumbers(data || []);
-    }
-    setLoading(false);
-  };
-
-  const fetchUsers = async () => {
-    const { data, error } = await supabase
-      .from('users')
-      .select('*')
-      .eq('role', 'user')
-      .order('email');
-
-    if (error) {
-      toast.error('Failed to fetch users');
-      console.error(error);
-    } else {
-      setUsers(data || []);
-    }
-  };
-
-  const addPhoneNumber = async () => {
-    if (!newNumber) {
-      toast.error('Please enter a phone number');
-      return;
-    }
-
-    const { error } = await supabase
-      .from('phone_numbers')
-      .insert({
-        number: newNumber,
-        user_id: selectedUserId || null,
-      });
-
-    if (error) {
-      toast.error('Failed to add phone number');
-      console.error(error);
-    } else {
-      toast.success('Phone number added successfully');
-      setNewNumber('');
-      setSelectedUserId('');
-      fetchPhoneNumbers();
-    }
-  };
-
-  const assignPhoneNumber = async (phoneNumberId: string, userId: string | null) => {
-    const { error } = await supabase
-      .from('phone_numbers')
-      .update({ user_id: userId })
-      .eq('id', phoneNumberId);
-
-    if (error) {
-      toast.error('Failed to assign phone number');
-      console.error(error);
-    } else {
-      toast.success(userId ? 'Phone number assigned' : 'Phone number unassigned');
-      fetchPhoneNumbers();
-    }
-  };
-
-  const deletePhoneNumber = async (phoneNumberId: string) => {
-    if (!confirm('Are you sure you want to delete this phone number?')) return;
-
-    const { error } = await supabase
-      .from('phone_numbers')
-      .delete()
-      .eq('id', phoneNumberId);
-
-    if (error) {
-      toast.error('Failed to delete phone number');
-      console.error(error);
-    } else {
-      toast.success('Phone number deleted');
-      fetchPhoneNumbers();
-    }
-  };
+  // Fetch all phone numbers with their assigned users
+  const { data: phoneNumbers } = await supabase
+    .from('phone_numbers')
+    .select(`
+      *,
+      users(id, name, username, email)
+    `)
+    .order('created_at', { ascending: false });
 
   return (
-    <div className="container mx-auto py-8">
-      <div className="mb-8">
-        <h1 className="text-3xl font-bold">Phone Number Management</h1>
-        <p className="text-muted-foreground">Manage and assign phone numbers to users</p>
-      </div>
-
-      <Card className="mb-8">
-        <CardHeader>
-          <CardTitle>Add New Phone Number</CardTitle>
-          <CardDescription>Add a new phone number to the system</CardDescription>
-        </CardHeader>
-        <CardContent>
-          <div className="flex gap-4">
-            <div className="flex-1">
-              <Label htmlFor="phone">Phone Number</Label>
-              <Input
-                id="phone"
-                type="tel"
-                placeholder="+1234567890"
-                value={newNumber}
-                onChange={(e) => setNewNumber(e.target.value)}
-              />
-            </div>
-            <div className="flex-1">
-              <Label htmlFor="user">Assign to User (Optional)</Label>
-              <Select value={selectedUserId} onValueChange={setSelectedUserId}>
-                <SelectTrigger id="user">
-                  <SelectValue placeholder="Select a user" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="">No user</SelectItem>
-                  {users.map((user) => (
-                    <SelectItem key={user.id} value={user.id}>
-                      {user.email}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-            <div className="flex items-end">
-              <Button onClick={addPhoneNumber}>
-                <Plus className="mr-2 h-4 w-4" />
-                Add Number
-              </Button>
-            </div>
+    <AppLayout user={admin}>
+      <div className="space-y-6">
+        <div className="flex items-center justify-between">
+          <div>
+            <h1 className="text-3xl font-bold">Phone Number Management</h1>
+            <p className="text-gray-600 mt-2">Manage phone numbers from Twilio and SignalWire</p>
           </div>
-        </CardContent>
-      </Card>
+          <Link href="/admin/phone-numbers/add">
+            <Button>
+              <Plus className="mr-2 h-4 w-4" />
+              Add Phone Number
+            </Button>
+          </Link>
+        </div>
 
-      <Card>
-        <CardHeader>
-          <CardTitle>Phone Numbers</CardTitle>
-          <CardDescription>All phone numbers in the system</CardDescription>
-        </CardHeader>
-        <CardContent>
-          {loading ? (
-            <div className="text-center py-8">Loading...</div>
-          ) : (
+        <Card>
+          <CardHeader>
+            <CardTitle>All Phone Numbers</CardTitle>
+            <CardDescription>
+              Phone numbers from all providers with their assignment status
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
             <Table>
               <TableHeader>
                 <TableRow>
                   <TableHead>Phone Number</TableHead>
-                  <TableHead>Assigned To</TableHead>
+                  <TableHead>Provider</TableHead>
+                  <TableHead>Provider SID</TableHead>
                   <TableHead>Status</TableHead>
-                  <TableHead>Created</TableHead>
-                  <TableHead>Actions</TableHead>
+                  <TableHead>Assigned To</TableHead>
+                  <TableHead>Added</TableHead>
+                  <TableHead className="text-right">Actions</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {phoneNumbers.map((phoneNumber) => (
-                  <TableRow key={phoneNumber.id}>
-                    <TableCell className="font-medium">
-                      <div className="flex items-center gap-2">
-                        <Phone className="h-4 w-4" />
-                        {formatPhoneNumber(phoneNumber.number)}
-                      </div>
+                {phoneNumbers?.map((phone) => (
+                  <TableRow key={phone.id}>
+                    <TableCell className="font-mono">{phone.number}</TableCell>
+                    <TableCell>
+                      <Badge variant="outline">
+                        {phone.provider}
+                      </Badge>
+                    </TableCell>
+                    <TableCell className="font-mono text-sm">
+                      {phone.provider_sid || '-'}
                     </TableCell>
                     <TableCell>
-                      {phoneNumber.user ? (
-                        <div className="flex items-center gap-2">
-                          <UserIcon className="h-4 w-4" />
-                          {phoneNumber.user.email}
+                      {phone.is_active ? (
+                        <div className="flex items-center text-green-600">
+                          <CheckCircle className="mr-1 h-4 w-4" />
+                          Active
                         </div>
                       ) : (
-                        <span className="text-muted-foreground">Unassigned</span>
+                        <div className="flex items-center text-red-600">
+                          <XCircle className="mr-1 h-4 w-4" />
+                          Inactive
+                        </div>
                       )}
                     </TableCell>
                     <TableCell>
-                      <span
-                        className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${
-                          phoneNumber.is_active
-                            ? 'bg-green-100 text-green-800'
-                            : 'bg-gray-100 text-gray-800'
-                        }`}
-                      >
-                        {phoneNumber.is_active ? 'Active' : 'Inactive'}
-                      </span>
+                      {phone.users ? (
+                        <div>
+                          <p className="font-medium">{phone.users.name}</p>
+                          <p className="text-sm text-gray-500">
+                            {phone.users.username || phone.users.email}
+                          </p>
+                        </div>
+                      ) : (
+                        <span className="text-gray-500">Unassigned</span>
+                      )}
                     </TableCell>
-                    <TableCell>
-                      {new Date(phoneNumber.created_at).toLocaleDateString()}
-                    </TableCell>
-                    <TableCell>
-                      <div className="flex items-center gap-2">
-                        <Select
-                          value={phoneNumber.user_id || ''}
-                          onValueChange={(value) =>
-                            assignPhoneNumber(phoneNumber.id, value || null)
-                          }
-                        >
-                          <SelectTrigger className="w-32">
-                            <SelectValue placeholder="Assign to" />
-                          </SelectTrigger>
-                          <SelectContent>
-                            <SelectItem value="">Unassign</SelectItem>
-                            {users.map((user) => (
-                              <SelectItem key={user.id} value={user.id}>
-                                {user.email}
-                              </SelectItem>
-                            ))}
-                          </SelectContent>
-                        </Select>
-                        <Button
-                          variant="ghost"
-                          size="icon"
-                          onClick={() => deletePhoneNumber(phoneNumber.id)}
-                        >
-                          <Trash2 className="h-4 w-4" />
-                        </Button>
-                      </div>
+                    <TableCell>{new Date(phone.created_at).toLocaleDateString()}</TableCell>
+                    <TableCell className="text-right">
+                      <DropdownMenu>
+                        <DropdownMenuTrigger asChild>
+                          <Button variant="ghost" className="h-8 w-8 p-0">
+                            <MoreVertical className="h-4 w-4" />
+                          </Button>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent align="end">
+                          <DropdownMenuItem asChild>
+                            <Link href={`/admin/phone-numbers/${phone.id}/test`}>
+                              <Phone className="mr-2 h-4 w-4" />
+                              Test Connection
+                            </Link>
+                          </DropdownMenuItem>
+                          <DropdownMenuItem asChild>
+                            <Link href={`/admin/phone-numbers/${phone.id}/assign`}>
+                              Assign to User
+                            </Link>
+                          </DropdownMenuItem>
+                          {phone.user_id && (
+                            <DropdownMenuItem asChild>
+                              <Link href={`/admin/phone-numbers/${phone.id}/unassign`}>
+                                Unassign from User
+                              </Link>
+                            </DropdownMenuItem>
+                          )}
+                          <DropdownMenuItem asChild>
+                            <Link href={`/admin/phone-numbers/${phone.id}/sync`}>
+                              <RefreshCw className="mr-2 h-4 w-4" />
+                              Sync with Provider
+                            </Link>
+                          </DropdownMenuItem>
+                        </DropdownMenuContent>
+                      </DropdownMenu>
                     </TableCell>
                   </TableRow>
                 ))}
               </TableBody>
             </Table>
-          )}
-        </CardContent>
-      </Card>
-    </div>
+          </CardContent>
+        </Card>
+      </div>
+    </AppLayout>
   );
 } 

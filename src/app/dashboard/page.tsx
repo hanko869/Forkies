@@ -3,6 +3,7 @@ import { createClient } from '@/lib/supabase/server';
 import AppLayout from '@/components/shared/AppLayout';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
 import { MessageSquare, Phone, CreditCard, TrendingUp } from 'lucide-react';
 import Link from 'next/link';
 
@@ -31,11 +32,12 @@ export default async function DashboardPage() {
     .order('last_message_at', { ascending: false })
     .limit(5);
 
-  // Fetch phone numbers count
-  const { count: phoneNumbersCount } = await supabase
+  // Fetch phone numbers
+  const { data: phoneNumbers, count: phoneNumbersCount } = await supabase
     .from('phone_numbers')
-    .select('*', { count: 'exact', head: true })
-    .eq('user_id', user.id);
+    .select('*', { count: 'exact' })
+    .eq('user_id', user.id)
+    .eq('is_active', true);
 
   return (
     <AppLayout user={user}>
@@ -124,6 +126,34 @@ export default async function DashboardPage() {
             </Link>
           </CardContent>
         </Card>
+
+        {/* Assigned Phone Numbers */}
+        {phoneNumbers && phoneNumbers.length > 0 && (
+          <Card>
+            <CardHeader>
+              <CardTitle>Your Phone Numbers</CardTitle>
+              <CardDescription>Phone numbers assigned to your account</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-2">
+                {phoneNumbers.map((number: any) => (
+                  <div key={number.id} className="flex items-center justify-between p-3 rounded-lg border">
+                    <div className="flex items-center space-x-3">
+                      <Phone className="h-4 w-4 text-gray-500" />
+                      <span className="font-mono">{number.number}</span>
+                    </div>
+                    <div className="flex items-center space-x-2">
+                      <Badge variant="outline">{number.provider}</Badge>
+                      <Badge variant={number.is_active ? 'default' : 'secondary'}>
+                        {number.is_active ? 'Active' : 'Inactive'}
+                      </Badge>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </CardContent>
+          </Card>
+        )}
 
         {/* Recent Conversations */}
         {conversations && conversations.length > 0 && (

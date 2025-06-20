@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
-import { sendSMS } from '@/lib/twilio/client';
+import { sendSMS } from '@/lib/sms/provider';
 
 export async function POST(request: NextRequest) {
   try {
@@ -77,8 +77,13 @@ export async function POST(request: NextRequest) {
       .select()
       .single();
 
-    // Send SMS via Twilio
-    const result = await sendSMS(recipientNumber, phoneNumber.number, message);
+    // Send SMS via provider (Twilio or SignalWire)
+    const result = await sendSMS({
+      to: recipientNumber,
+      from: phoneNumber.number,
+      body: message,
+      userId: user.id
+    });
 
     if (result.success) {
       // Update message status
@@ -86,7 +91,7 @@ export async function POST(request: NextRequest) {
         .from('messages')
         .update({
           status: 'sent',
-          twilio_sid: result.messageId,
+          provider_sid: result.messageId,
         })
         .eq('id', messageRecord.id);
 
@@ -119,7 +124,7 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({
         success: true,
         messageId: messageRecord.id,
-        twilioSid: result.messageId,
+        providerSid: result.messageId,
       });
     } else {
       // Update message status to failed
