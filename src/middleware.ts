@@ -7,27 +7,41 @@ export async function middleware(request: NextRequest) {
   const publicPaths = ['/', '/login', '/signup'];
   const pathname = request.nextUrl.pathname;
   
+  console.log(`[Middleware] Processing request for: ${pathname}`);
+  
   if (publicPaths.includes(pathname)) {
+    console.log(`[Middleware] ${pathname} is a public path, allowing access`);
     return NextResponse.next();
   }
 
-  const supabase = await createClient();
-  const { data: { user } } = await supabase.auth.getUser();
+  try {
+    const supabase = await createClient();
+    const { data: { user }, error } = await supabase.auth.getUser();
 
-  if (!user) {
-    console.log(`No user found, redirecting to login from: ${pathname}`);
-    return NextResponse.redirect(new URL('/login', request.url));
-  }
-
-  // Check if trying to access admin routes
-  if (pathname.startsWith('/admin')) {
-    if (user.user_metadata?.role !== 'admin') {
-      console.log(`User ${user.email} is not admin, redirecting to dashboard`);
-      return NextResponse.redirect(new URL('/dashboard', request.url));
+    if (error) {
+      console.log(`[Middleware] Error getting user:`, error);
     }
-  }
 
-  return NextResponse.next();
+    if (!user) {
+      console.log(`[Middleware] No user found, redirecting to login from: ${pathname}`);
+      return NextResponse.redirect(new URL('/login', request.url));
+    }
+
+    console.log(`[Middleware] User found: ${user.email}`);
+
+    // Check if trying to access admin routes
+    if (pathname.startsWith('/admin')) {
+      if (user.user_metadata?.role !== 'admin') {
+        console.log(`[Middleware] User ${user.email} is not admin, redirecting to dashboard`);
+        return NextResponse.redirect(new URL('/dashboard', request.url));
+      }
+    }
+
+    return NextResponse.next();
+  } catch (error) {
+    console.error(`[Middleware] Unexpected error:`, error);
+    return NextResponse.next();
+  }
 }
 
 export const config = {

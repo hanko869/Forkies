@@ -9,6 +9,7 @@ import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Loader2 } from 'lucide-react';
 import Link from 'next/link';
+import { MessageSquare } from 'lucide-react';
 
 export default function LoginPage() {
   const [username, setUsername] = useState('');
@@ -118,23 +119,17 @@ export default function LoginPage() {
       <div className="relative z-10 flex items-center justify-center min-h-screen p-4">
         <Card className="w-full max-w-md backdrop-blur-sm bg-white/95 shadow-2xl border-0">
           <CardHeader className="space-y-1 pb-6">
-            <div className="flex justify-center mb-6">
-              {/* Fork Logo */}
+            <div className="flex justify-center mb-4">
               <div className="relative">
                 <div className="absolute inset-0 bg-gradient-to-r from-purple-600 to-blue-600 rounded-full blur-lg opacity-75"></div>
                 <div className="relative bg-gradient-to-r from-purple-600 to-blue-600 p-4 rounded-full">
-                  <svg width="40" height="40" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" className="text-white">
-                    <path d="M5 7C5 5.89543 5.89543 5 7 5C8.10457 5 9 5.89543 9 7V12L12 15L15 12V7C15 5.89543 15.8954 5 17 5C18.1046 5 19 5.89543 19 7V12C19 12.5304 18.7893 13.0391 18.4142 13.4142L13.4142 18.4142C12.6332 19.1953 11.3668 19.1953 10.5858 18.4142L5.58579 13.4142C5.21071 13.0391 5 12.5304 5 12V7Z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                    <path d="M12 15V21" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                  </svg>
+                  <MessageSquare className="h-8 w-8 text-white" />
                 </div>
               </div>
             </div>
-            <CardTitle className="text-2xl font-bold text-center bg-gradient-to-r from-purple-600 to-blue-600 bg-clip-text text-transparent">
-              Welcome to Forkies
-            </CardTitle>
+            <CardTitle className="text-2xl font-bold text-center">Welcome to Forkies</CardTitle>
             <CardDescription className="text-center">
-              Your powerful two-way SMS communication platform
+              Sign in to access your SMS communication dashboard
             </CardDescription>
           </CardHeader>
           <CardContent>

@@ -6,7 +6,7 @@ import { Toaster } from "@/components/ui/sonner";
 const inter = Inter({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
-  title: "2Way SMS - Two-Way SMS Communication Platform",
+  title: "Forkies - Professional SMS Communication Platform",
   description: "Professional SMS and voice communication platform with Google Voice-inspired interface",
 };
 

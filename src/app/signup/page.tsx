@@ -40,7 +40,7 @@ export default function SMSOptInPage() {
         consent,
         consentTimestamp: new Date().toISOString(),
         ipAddress: 'User IP would be logged here',
-        source: 'theforkies.com/sms-signup'
+        source: 'forkies.com/sms-signup'
       });
 
       setSubmitted(true);
@@ -63,7 +63,7 @@ export default function SMSOptInPage() {
               </div>
               <h2 className="text-2xl font-bold">Thank You!</h2>
               <p className="text-gray-600">
-                You've successfully subscribed to receive SMS notifications from TheForkies.
+                You've successfully subscribed to receive SMS notifications from Forkies.
               </p>
               <p className="text-sm text-gray-500">
                 You'll receive appointment reminders, promotional messages, and important notifications at {phone}.
@@ -96,7 +96,7 @@ export default function SMSOptInPage() {
             Subscribe to SMS Notifications
           </CardTitle>
           <CardDescription className="text-center">
-            Get appointment reminders, exclusive offers, and important updates from TheForkies
+            Get appointment reminders, exclusive offers, and important updates from Forkies
           </CardDescription>
         </CardHeader>
         <CardContent>
@@ -154,7 +154,7 @@ export default function SMSOptInPage() {
                   htmlFor="consent" 
                   className="text-sm leading-relaxed cursor-pointer"
                 >
-                  By checking this box, I consent to receive promotional and alert SMS from TheForkies. 
+                  By checking this box, I consent to receive promotional and alert SMS from Forkies. 
                   This includes appointment reminders, special offers, and important notifications. 
                   Message and data rates may apply. Reply STOP to unsubscribe at any time.
                 </Label>

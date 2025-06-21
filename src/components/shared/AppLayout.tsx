@@ -88,7 +88,7 @@ export default function AppLayout({ children, user }: AppLayoutProps) {
         <div className="flex items-center justify-between h-16 px-4 border-b">
           <Link href={user.role === 'admin' ? '/admin' : '/dashboard'} className="flex items-center space-x-2">
             <MessageSquare className="h-8 w-8 text-blue-600" />
-            <span className="text-xl font-bold">2Way SMS</span>
+            <span className="text-xl font-bold">Forkies</span>
           </Link>
           <button
             onClick={() => setSidebarOpen(false)}
